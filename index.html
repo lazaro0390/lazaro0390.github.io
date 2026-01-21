@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Voice Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+
+    #retell-mic {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #FFA07A;
+      color: white;
+      font-size: 28px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,.3);
+      z-index: 9999;
+    }
+
+    #retell-mic.active {
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,160,122,.6); }
+      70% { box-shadow: 0 0 0 20px rgba(255,160,122,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,160,122,0); }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>AI Voice Assistant</h1>
+  <p>Click the microphone to talk.</p>
+
+  <!-- Floating Mic Button -->
+  <button id="retell-mic">🎤</button>
+
+  <!-- Retell Voice Client -->
+  <script type="module">
+    import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
+
+    const client = new RetellWebClient();
+    const mic = document.getElementById("retell-mic");
+
+    mic.addEventListener("click", async () => {
+      mic.classList.add("active");
+
+      try {
+        await client.startCall({
+          agentId: "agent_b5e6124b5d509b173657e022eb"
+        });
+      } catch (err) {
+        console.error("Retell error:", err);
+        mic.classList.remove("active");
+        alert("Could not start voice session.");
+      }
+    });
+  </script>
+</body>
+</html>
