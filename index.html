@@ -51,13 +51,15 @@
     }
   </style>
 
-  <script type="module">
-    import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
+  <!-- ✅ Retell live voice API -->
+  <script src="https://dashboard.retellai.com/retell-client.js"></script>
 
+  <script>
     window.addEventListener("DOMContentLoaded", () => {
       const mic = document.getElementById("retell-mic");
       const status = document.getElementById("voice-status");
 
+      // ✅ Create Retell client
       const client = new RetellWebClient({
         publicKey: "public_key_7e1c07d76a00d7e19dc18"
       });
@@ -88,7 +90,7 @@
 
             callActive = true;
           } catch (err) {
-            console.error(err);
+            console.error("Error starting voice session:", err);
             setStatus("Error");
             mic.classList.remove("active");
           }
@@ -102,6 +104,7 @@
   <h1>AI Voice Assistant</h1>
   <p>Click the microphone and speak directly.</p>
 
+  <!-- Floating hot mic -->
   <button id="retell-mic">🎤</button>
   <div id="voice-status">Idle</div>
 </body>
