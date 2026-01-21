@@ -1,111 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Voice Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF‑8" />
+  <title>Retell AI Live Voice</title>
+  <meta name="viewport" content="width=device‑width, initial‑scale=1.0" />
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-    }
-
-    #retell-mic {
-      position: fixed;
-      bottom: 70px;
-      right: 20px;
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: #FFA07A;
-      color: white;
-      font-size: 30px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(0,0,0,.3);
-      z-index: 9999;
-      transition: background 0.3s;
-    }
-
-    #retell-mic.active {
-      background: #ff3b3b;
-      animation: pulse 1.2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255,59,59,.6); }
-      70% { box-shadow: 0 0 0 22px rgba(255,59,59,0); }
-      100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
-    }
-
-    #voice-status {
+    #micBtn {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #111;
+      width: 64px;
+      height: 64px;
+      border: none;
+      border-radius: 50%;
+      background: #ff6f61;
       color: white;
-      padding: 6px 12px;
-      border-radius: 14px;
-      font-size: 14px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      z-index: 9999;
+    }
+    #micBtn:hover {
+      background: #e0554d;
     }
   </style>
 
-  <!-- ✅ Retell live voice API -->
-  <script src="https://dashboard.retellai.com/retell-client.js"></script>
+  <!-- Retell widget in voice mode -->
+  <script
+    id="retell-widget"
+    src="https://dashboard.retellai.com/retell-widget.js"
+    type="module"
+    data‑public‑key="public_key_7e1c07d76a00d7e19dc18"
+    data‑agent‑id="agent_b5e6124b5d509b173657e022eb"
+    data‑widget="voice"
+    data‑color="#ff6f61"
+  ></script>
+</head>
+<body>
+
+  <h1>Retell AI Live Voice</h1>
+  <p>Click the mic to speak directly with the AI.</p>
+
+  <!-- Floating Mic Button -->
+  <button id="micBtn">🎤</button>
 
   <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      const mic = document.getElementById("retell-mic");
-      const status = document.getElementById("voice-status");
+    const micBtn = document.getElementById("micBtn");
 
-      // ✅ Create Retell client
-      const client = new RetellWebClient({
-        publicKey: "public_key_7e1c07d76a00d7e19dc18"
-      });
-
-      let callActive = false;
-
-      const setStatus = (t) => status.textContent = t;
-
-      const stopCall = () => {
-        if (!callActive) return;
-        client.stopCall();
-        mic.classList.remove("active");
-        setStatus("Idle");
-        callActive = false;
-      };
-
-      mic.addEventListener("click", async () => {
-        if (callActive) {
-          stopCall();
-        } else {
-          try {
-            mic.classList.add("active");
-            setStatus("Listening…");
-
-            await client.startCall({
-              agentId: "agent_b5e6124b5d509b173657e022eb"
-            });
-
-            callActive = true;
-          } catch (err) {
-            console.error("Error starting voice session:", err);
-            setStatus("Error");
-            mic.classList.remove("active");
-          }
-        }
-      });
+    micBtn.addEventListener("click", () => {
+      // Open the Retell voice widget
+      if (window.RetellWidget) {
+        window.RetellWidget.openVoice();  
+      } else {
+        console.error("RetellWidget not loaded yet");
+      }
     });
   </script>
-</head>
 
-<body>
-  <h1>AI Voice Assistant</h1>
-  <p>Click the microphone and speak directly.</p>
-
-  <!-- Floating hot mic -->
-  <button id="retell-mic">🎤</button>
-  <div id="voice-status">Idle</div>
 </body>
 </html>
