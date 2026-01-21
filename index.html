@@ -37,6 +37,7 @@
       100% { box-shadow: 0 0 0 0 rgba(255,160,122,0); }
     }
   </style>
+  <script id="retell-widget" src="https://dashboard.retellai.com/retell-widget.js" type="module" data-public-key="public_key_7e1c07d76a00d7e19dc18" data-agent-id="agent_b5e6124b5d509b173657e022eb" data-widget="callback" data-phone-number="+17868825700" data-title="Request a Call" data-countries="US" data-color="#FFA07A" ></script>
 </head>
 
 <body>
@@ -47,32 +48,5 @@
   <button id="retell-mic">🎤</button>
 
   <!-- Retell Voice Client -->
-  <script type="module">
-  import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
-
-  const client = new RetellWebClient({
-    publicKey: "public_key_7e1c07d76a00d7e19dc18"
-  });
-
-  const mic = document.getElementById("retell-mic");
-
-  mic.addEventListener("click", async () => {
-    console.log("Mic clicked");
-
-    try {
-      mic.classList.add("active");
-
-      await client.startCall({
-        agentId: "agent_b5e6124b5d509b173657e022eb"
-      });
-
-      console.log("Call started");
-    } catch (err) {
-      console.error("Retell error:", err);
-      mic.classList.remove("active");
-      alert(err?.message || "Failed to start call");
-    }
-  });
-</script>
 </body>
 </html>
