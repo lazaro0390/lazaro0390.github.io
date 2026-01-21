@@ -6,10 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-    }
+    body { font-family: Arial, sans-serif; padding: 40px; }
 
     #micBtn {
       position: fixed;
@@ -27,12 +24,7 @@
       z-index: 9999;
       transition: background 0.3s;
     }
-
-    #micBtn.active {
-      background: #ff3b3b;
-      animation: pulse 1.2s infinite;
-    }
-
+    #micBtn.active { background: #ff3b3b; animation: pulse 1.2s infinite; }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(255,59,59,0.6); }
       70% { box-shadow: 0 0 0 20px rgba(255,59,59,0); }
@@ -68,7 +60,6 @@
   <h1>Retell AI Live Voice</h1>
   <p>Click the microphone to speak directly with the AI.</p>
 
-  <!-- Floating Mic Button -->
   <button id="micBtn">🎤</button>
   <div id="voiceStatus">Idle</div>
 
@@ -77,25 +68,29 @@
     const voiceStatus = document.getElementById("voiceStatus");
     let isOpen = false;
 
-    micBtn.addEventListener("click", () => {
-      if (!window.RetellWidget) {
-        console.error("Retell widget not loaded yet");
-        return;
-      }
+    // Wait for RetellWidget to load
+    const waitForRetell = () => new Promise(resolve => {
+      const check = () => {
+        if (window.RetellWidget) resolve();
+        else setTimeout(check, 100);
+      };
+      check();
+    });
 
-      if (!isOpen) {
-        // Open live voice session
-        window.RetellWidget.openVoice();
-        micBtn.classList.add("active");
-        voiceStatus.textContent = "Listening…";
-        isOpen = true;
-      } else {
-        // Close session
-        window.RetellWidget.close();
-        micBtn.classList.remove("active");
-        voiceStatus.textContent = "Idle";
-        isOpen = false;
-      }
+    waitForRetell().then(() => {
+      micBtn.addEventListener("click", () => {
+        if (!isOpen) {
+          window.RetellWidget.openVoice();
+          micBtn.classList.add("active");
+          voiceStatus.textContent = "Listening…";
+          isOpen = true;
+        } else {
+          window.RetellWidget.close();
+          micBtn.classList.remove("active");
+          voiceStatus.textContent = "Idle";
+          isOpen = false;
+        }
+      });
     });
   </script>
 </body>
