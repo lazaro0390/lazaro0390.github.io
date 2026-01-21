@@ -13,58 +13,115 @@
 
     #retell-mic {
       position: fixed;
-      bottom: 20px;
+      bottom: 70px;
       right: 20px;
-      width: 64px;
-      height: 64px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: #FFA07A;
       color: white;
-      font-size: 28px;
+      font-size: 30px;
       border: none;
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(0,0,0,.3);
       z-index: 9999;
+      transition: background 0.3s;
     }
 
     #retell-mic.active {
+      background: #ff3b3b;
       animation: pulse 1.2s infinite;
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255,160,122,.6); }
-      70% { box-shadow: 0 0 0 20px rgba(255,160,122,0); }
-      100% { box-shadow: 0 0 0 0 rgba(255,160,122,0); }
+      0% { box-shadow: 0 0 0 0 rgba(255,59,59,.6); }
+      70% { box-shadow: 0 0 0 22px rgba(255,59,59,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+    }
+
+    #voice-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #111;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      opacity: 0.85;
+      z-index: 9999;
     }
   </style>
 
-  <!-- Retell Voice Script (MUST WAIT FOR DOM) -->
   <script type="module">
     import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
 
     window.addEventListener("DOMContentLoaded", () => {
       const mic = document.getElementById("retell-mic");
+      const status = document.getElementById("voice-status");
 
       const client = new RetellWebClient({
         publicKey: "public_key_7e1c07d76a00d7e19dc18"
       });
 
+      let callActive = false;
+      let silenceTimer = null;
+
+      const setStatus = (text) => {
+        status.textContent = text;
+      };
+
+      const resetSilenceTimer = () => {
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+          endCall();
+        }, 5000); // ⏱ auto-stop after 5s of silence
+      };
+
+      const startCall = async () => {
+        mic.classList.add("active");
+        setStatus("Listening…");
+
+        await client.startCall({
+          agentId: "agent_b5e6124b5d509b173657e022eb"
+        });
+
+        callActive = true;
+        resetSilenceTimer();
+      };
+
+      const endCall = () => {
+        if (!callActive) return;
+
+        client.stopCall();
+        mic.classList.remove("active");
+        setStatus("Idle");
+        callActive = false;
+      };
+
       mic.addEventListener("click", async () => {
-        console.log("Mic clicked");
-
         try {
-          mic.classList.add("active");
-
-          await client.startCall({
-            agentId: "agent_b5e6124b5d509b173657e022eb"
-          });
-
-          console.log("Call started");
+          if (!callActive) {
+            await startCall();
+          } else {
+            endCall();
+          }
         } catch (err) {
-          console.error("Retell error:", err);
+          console.error(err);
+          setStatus("Error");
           mic.classList.remove("active");
-          alert(err?.message || "Failed to start voice session");
         }
+      });
+
+      // 🔊 Retell events (listening vs speaking)
+      client.on("speech_started", () => {
+        setStatus("Speaking…");
+        clearTimeout(silenceTimer);
+      });
+
+      client.on("speech_ended", () => {
+        setStatus("Listening…");
+        resetSilenceTimer();
       });
     });
   </script>
@@ -72,9 +129,9 @@
 
 <body>
   <h1>AI Voice Assistant</h1>
-  <p>Click the microphone to speak.</p>
+  <p>Click the microphone and speak naturally.</p>
 
-  <!-- Floating Mic Button -->
   <button id="retell-mic">🎤</button>
+  <div id="voice-status">Idle</div>
 </body>
 </html>
