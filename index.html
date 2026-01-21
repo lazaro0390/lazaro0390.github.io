@@ -48,24 +48,31 @@
 
   <!-- Retell Voice Client -->
   <script type="module">
-    import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
+  import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
 
-    const client = new RetellWebClient();
-    const mic = document.getElementById("retell-mic");
+  const client = new RetellWebClient({
+    publicKey: "public_key_7e1c07d76a00d7e19dc18"
+  });
 
-    mic.addEventListener("click", async () => {
+  const mic = document.getElementById("retell-mic");
+
+  mic.addEventListener("click", async () => {
+    console.log("Mic clicked");
+
+    try {
       mic.classList.add("active");
 
-      try {
-        await client.startCall({
-          agentId: "agent_b5e6124b5d509b173657e022eb"
-        });
-      } catch (err) {
-        console.error("Retell error:", err);
-        mic.classList.remove("active");
-        alert("Could not start voice session.");
-      }
-    });
-  </script>
+      await client.startCall({
+        agentId: "agent_b5e6124b5d509b173657e022eb"
+      });
+
+      console.log("Call started");
+    } catch (err) {
+      console.error("Retell error:", err);
+      mic.classList.remove("active");
+      alert(err?.message || "Failed to start call");
+    }
+  });
+</script>
 </body>
 </html>
