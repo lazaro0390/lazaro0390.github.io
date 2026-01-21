@@ -1,62 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF‑8" />
+  <meta charset="UTF-8" />
   <title>Retell AI Live Voice</title>
-  <meta name="viewport" content="width=device‑width, initial‑scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+    }
+
     #micBtn {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 64px;
-      height: 64px;
+      width: 70px;
+      height: 70px;
       border: none;
       border-radius: 50%;
-      background: #ff6f61;
+      background: #FFA07A;
       color: white;
-      font-size: 28px;
+      font-size: 32px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
       z-index: 9999;
+      transition: background 0.3s;
     }
-    #micBtn:hover {
-      background: #e0554d;
+
+    #micBtn.active {
+      background: #ff3b3b;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,59,59,0.6); }
+      70% { box-shadow: 0 0 0 20px rgba(255,59,59,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+    }
+
+    #voiceStatus {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: #111;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      opacity: 0.85;
     }
   </style>
 
-  <!-- Retell widget in voice mode -->
+  <!-- Retell widget (voice mode) -->
   <script
     id="retell-widget"
     src="https://dashboard.retellai.com/retell-widget.js"
     type="module"
-    data‑public‑key="public_key_7e1c07d76a00d7e19dc18"
-    data‑agent‑id="agent_b5e6124b5d509b173657e022eb"
-    data‑widget="voice"
-    data‑color="#ff6f61"
+    data-public-key="public_key_7e1c07d76a00d7e19dc18"
+    data-agent-id="agent_b5e6124b5d509b173657e022eb"
+    data-widget="voice"
+    data-color="#FFA07A"
   ></script>
 </head>
-<body>
 
+<body>
   <h1>Retell AI Live Voice</h1>
-  <p>Click the mic to speak directly with the AI.</p>
+  <p>Click the microphone to speak directly with the AI.</p>
 
   <!-- Floating Mic Button -->
   <button id="micBtn">🎤</button>
+  <div id="voiceStatus">Idle</div>
 
   <script>
     const micBtn = document.getElementById("micBtn");
+    const voiceStatus = document.getElementById("voiceStatus");
+    let isOpen = false;
 
     micBtn.addEventListener("click", () => {
-      // Open the Retell voice widget
-      if (window.RetellWidget) {
-        window.RetellWidget.openVoice();  
+      if (!window.RetellWidget) {
+        console.error("Retell widget not loaded yet");
+        return;
+      }
+
+      if (!isOpen) {
+        // Open live voice session
+        window.RetellWidget.openVoice();
+        micBtn.classList.add("active");
+        voiceStatus.textContent = "Listening…";
+        isOpen = true;
       } else {
-        console.error("RetellWidget not loaded yet");
+        // Close session
+        window.RetellWidget.close();
+        micBtn.classList.remove("active");
+        voiceStatus.textContent = "Idle";
+        isOpen = false;
       }
     });
   </script>
-
 </body>
 </html>
