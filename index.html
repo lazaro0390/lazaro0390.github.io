@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Retell AI Live Voice</title>
+  <title>Vapi AI Live Voice</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body { font-family: Arial, sans-serif; padding: 40px; }
-
-    #micBtn {
+    #vapiMic {
       position: fixed;
       bottom: 20px;
       right: 20px;
@@ -16,7 +15,7 @@
       height: 70px;
       border: none;
       border-radius: 50%;
-      background: #FFA07A;
+      background: #4CAF50;
       color: white;
       font-size: 32px;
       cursor: pointer;
@@ -24,13 +23,15 @@
       z-index: 9999;
       transition: background 0.3s;
     }
-    #micBtn.active { background: #ff3b3b; animation: pulse 1.2s infinite; }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255,59,59,0.6); }
-      70% { box-shadow: 0 0 0 20px rgba(255,59,59,0); }
-      100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+    #vapiMic.active {
+      background: #2E7D32;
+      animation: pulse 1.2s infinite;
     }
-
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46,125,50,0.6); }
+      70% { box-shadow: 0 0 0 20px rgba(46,125,50,0); }
+      100% { box-shadow: 0 0 0 0 rgba(46,125,50,0); }
+    }
     #voiceStatus {
       position: fixed;
       bottom: 100px;
@@ -44,53 +45,63 @@
     }
   </style>
 
-  <!-- Retell widget (voice mode) -->
-  <script
-    id="retell-widget"
-    src="https://dashboard.retellai.com/retell-widget.js"
-    type="module"
-    data-public-key="public_key_7e1c07d76a00d7e19dc18"
-    data-agent-id="agent_b5e6124b5d509b173657e022eb"
-    data-widget="voice"
-    data-color="#FFA07A"
-  ></script>
+  <!-- Vapi Widget Script -->
+  <script>
+    var vapiInstance = null;
+    const assistant = "42aa8590-d562-4a7c-a4d4-e593b58910f2"; // Your Assistant ID
+    const apiKey = "c7c09835-c129-43c9-9af1-279a9ef03afc";    // Your Public Key
+    const buttonConfig = {}; // Optional additional config
+
+    (function (d, t) {
+      var g = document.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      g.src =
+        "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+      g.defer = true;
+      g.async = true;
+      s.parentNode.insertBefore(g, s);
+
+      g.onload = function () {
+        vapiInstance = window.vapiSDK.run({
+          apiKey: apiKey,
+          assistant: assistant,
+          config: buttonConfig
+        });
+      };
+    })(document, "script");
+  </script>
 </head>
 
 <body>
-  <h1>Retell AI Live Voice</h1>
-  <p>Click the microphone to speak directly with the AI.</p>
+  <h1>Vapi AI Live Voice</h1>
+  <p>Click the microphone to speak directly with the AI assistant.</p>
 
-  <button id="micBtn">🎤</button>
+  <!-- Floating Mic Button -->
+  <button id="vapiMic">🎤</button>
   <div id="voiceStatus">Idle</div>
 
   <script>
-    const micBtn = document.getElementById("micBtn");
+    const micBtn = document.getElementById("vapiMic");
     const voiceStatus = document.getElementById("voiceStatus");
-    let isOpen = false;
+    let isActive = false;
 
-    // Wait for RetellWidget to load
-    const waitForRetell = () => new Promise(resolve => {
-      const check = () => {
-        if (window.RetellWidget) resolve();
-        else setTimeout(check, 100);
-      };
-      check();
-    });
+    micBtn.addEventListener("click", () => {
+      if (!vapiInstance) {
+        console.error("Vapi SDK not loaded yet");
+        return;
+      }
 
-    waitForRetell().then(() => {
-      micBtn.addEventListener("click", () => {
-        if (!isOpen) {
-          window.RetellWidget.openVoice();
-          micBtn.classList.add("active");
-          voiceStatus.textContent = "Listening…";
-          isOpen = true;
-        } else {
-          window.RetellWidget.close();
-          micBtn.classList.remove("active");
-          voiceStatus.textContent = "Idle";
-          isOpen = false;
-        }
-      });
+      if (!isActive) {
+        vapiInstance.start(); // Start live voice session
+        micBtn.classList.add("active");
+        voiceStatus.textContent = "Listening…";
+        isActive = true;
+      } else {
+        vapiInstance.stop(); // Stop voice session
+        micBtn.classList.remove("active");
+        voiceStatus.textContent = "Idle";
+        isActive = false;
+      }
     });
   </script>
 </body>
