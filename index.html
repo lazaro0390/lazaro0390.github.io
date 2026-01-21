@@ -25,6 +25,7 @@
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(0,0,0,.3);
       z-index: 9999;
+      transition: background 0.3s;
     }
 
     #retell-mic.active {
@@ -53,7 +54,7 @@
   <script type="module">
     import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js";
 
-    window.addEventListener("DOMContentLoaded", async () => {
+    window.addEventListener("DOMContentLoaded", () => {
       const mic = document.getElementById("retell-mic");
       const status = document.getElementById("voice-status");
 
@@ -62,7 +63,6 @@
       });
 
       let callActive = false;
-      let audioContext, analyser, dataArray, silenceTimer;
 
       const setStatus = (t) => status.textContent = t;
 
@@ -72,51 +72,27 @@
         mic.classList.remove("active");
         setStatus("Idle");
         callActive = false;
-        clearTimeout(silenceTimer);
-      };
-
-      const monitorSilence = () => {
-        analyser.getByteTimeDomainData(dataArray);
-
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += Math.abs(dataArray[i] - 128);
-        }
-
-        if (sum < 200) {
-          silenceTimer ??= setTimeout(stopCall, 4000);
-        } else {
-          clearTimeout(silenceTimer);
-          silenceTimer = null;
-        }
-
-        if (callActive) requestAnimationFrame(monitorSilence);
       };
 
       mic.addEventListener("click", async () => {
         if (callActive) {
           stopCall();
-          return;
+        } else {
+          try {
+            mic.classList.add("active");
+            setStatus("Listening…");
+
+            await client.startCall({
+              agentId: "agent_b5e6124b5d509b173657e022eb"
+            });
+
+            callActive = true;
+          } catch (err) {
+            console.error(err);
+            setStatus("Error");
+            mic.classList.remove("active");
+          }
         }
-
-        mic.classList.add("active");
-        setStatus("Listening…");
-
-        await client.startCall({
-          agentId: "agent_b5e6124b5d509b173657e022eb"
-        });
-
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioContext = new AudioContext();
-        analyser = audioContext.createAnalyser();
-        const source = audioContext.createMediaStreamSource(stream);
-        source.connect(analyser);
-
-        analyser.fftSize = 2048;
-        dataArray = new Uint8Array(analyser.fftSize);
-
-        callActive = true;
-        monitorSilence();
       });
     });
   </script>
@@ -124,7 +100,7 @@
 
 <body>
   <h1>AI Voice Assistant</h1>
-  <p>Click the microphone and speak.</p>
+  <p>Click the microphone and speak directly.</p>
 
   <button id="retell-mic">🎤</button>
   <div id="voice-status">Idle</div>
